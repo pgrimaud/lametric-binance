@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace LaMetric;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Client as HttpClient;
+use LaMetric\Helper\SymbolHelper;
+use Predis\Client as RedisClient;
 use LaMetric\Response\{Frame, FrameCollection};
+use Binance\API as BinanceAPI;
 
 class Api
 {
-    public function __construct(private Client $client, private array $credentials = [])
-    {
+    public const CMC_API = 'https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?cryptocurrency_type=all&limit=4999&convert=';
+
+    public function __construct(
+        private HttpClient $httpClient,
+        private RedisClient $redisClient,
+        private array $credentials = []
+    ) {
     }
 
     /**
@@ -20,18 +28,42 @@ class Api
      */
     public function fetchData(array $parameters = []): FrameCollection
     {
-        /**
-         * You can call whatever API you want and extract data as array or object
-         *
-         * object $this->client (Guzzle HTTP) is available to make curl requests
-         * array $this->credentials contains sensitive data
-         * array $parameters (credentials) can contain sensitive data
-         *
-         * Here for example, we will return IP of user
-         */
+        $redisKey   = 'lametric:crypto-account:prices:' . strtolower($parameters['currency']);
+        $jsonPrices = $this->redisClient->get($redisKey);
+
+        if (!$jsonPrices) {
+            $cmcApi     = self::CMC_API . strtolower($parameters['currency']);
+            $res        = $this->httpClient->request('GET', $cmcApi);
+            $jsonPrices = (string) $res->getBody();
+
+            $this->redisClient->set($redisKey, $jsonPrices, 'ex', 120);
+        }
+
+        $prices = json_decode($jsonPrices, true);
+
+        $api = new BinanceAPI(
+            $parameters['api-key'],
+            $parameters['secret-key']
+        );
+
+        $account = $api->account();
+
+        $totalBalance = 0;
+
+        foreach ($account['balances'] as $balance) {
+            if ($balance['free'] > 0 || $balance['locked'] > 0) {
+                foreach ($prices['data'] as $crypto) {
+                    if ($crypto['symbol'] === $balance['asset']) {
+                        $binanceBalance = $balance['free'] + $balance['locked'];
+                        $totalBalance += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
+                        break;
+                    }
+                }
+            }
+        }
 
         return $this->mapData([
-            'ip' => $_SERVER['REMOTE_HOST'] ?? 'UNKNOWN',
+            'total' => SymbolHelper::getSymbol($parameters['currency']) . round($totalBalance, 2),
         ]);
     }
 
@@ -48,8 +80,8 @@ class Api
          * Transform data as FrameCollection and Frame
          */
         $frame = new Frame();
-        $frame->setText($data['ip']);
-        $frame->setIcon('');
+        $frame->setText($data['total']);
+        $frame->setIcon('43725');
 
         $frameCollection->addFrame($frame);
 

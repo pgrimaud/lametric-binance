@@ -1,96 +1,31 @@
-# LaMetric App Starter
+# Binance for LaMetric
 
-This starter allow you to create LaMetric apps easily. (Indicator App)
+Easily display the total balance of your cryptocurrencies of your Binance Spot account.
 
-## How to use it?
+![image](https://user-images.githubusercontent.com/1866496/119222359-52de0280-baf4-11eb-871e-5929a33d1d24.png)
 
-Fork this project or create a new repository using [this link](https://github.com/pgrimaud/lametric-app-starter/generate).
+Based on the [Binance API](https://binance-docs.github.io/apidocs/spot/en/) and [CoinMarketCap API](https://coinmarketcap.com/api/)
 
-## How it works?
+# How to connect your Binance account?
 
-### Step 1
+1. Login to your Binance account here : https://www.binance.com/en/my/settings/api-management
+2. Click on your profile picture then click on **API Management**
+3. Generate a new API key. ⚠️ **Only check the "Enable Reading" scope for security reason.**
+4. Copy your new API key and Secret Key into your LaMetric Binance application
 
-Declare fields you want to retrieve from your LaMetric App you designed, in file `config/fields.php`.
+# Donations 🙏
 
-e.g.
+If you like or use this app, please share your love by starring this repository, follow [@pgrimaud](https://github.com/pgrimaud) / [@nispeon](https://github.com/nispeon) or make a donation. 🙏💓
 
-```php
-return [
-    [
-        'key'  => 'field-1',
-        'type' => Field::TEXT_TYPE,
-    ],
-    [
-        'key'  => 'field-2',
-        'type' => Field::NUMBER_TYPE,
-    ],
-    [
-        'key'  => 'field-3',
-        'type' => Field::SWITCH_TYPE,
-    ],
-    [
-        'key'     => 'field-4',
-        'type'    => Field::CHOICES_TYPE,
-        'choices' => [
-            'iron-man',
-            'captain-america',
-            'ant-man',
-            'thor',
-        ]
-    ]
-];
-```
+- **BTC** : `bc1qn5thzc2h376c4zrv6phten02p6mtj60j3ujm86`
+- **ETH / ERC20** : `0xCc070742bebB01A43B12E123C9c989E3E4d4E913`
+- **BSC / BEP20** : `0xE5035aD19843A2d8dF885511BC79d7182047b80`
 
-Fields type association with https://developer.lametric.com :
+# Authors
 
- - **Field::TEXT_TYPE** : Text field
- - **Field::NUMBER_TYPE** : Number
- - **Field::SWITCH_TYPE** : Switch
- - **Field::CHOICES_TYPE** : Single choice
-
-The `src/Validator.php` object will check parameters sent by the app and manage errors.
-
-You can also add `default` key to a field. If the value is missing from app request, this valus will be use.
-
-e.g.
-
-```php
-return [
-    [
-        'key'     => 'field-1',
-        'type'    => Field::TEXT_TYPE,
-        'default' => 'hello'
-    ],
-];
-```
-
-### Step 2
-
-Add you logic to the method `fetchData()` in `src/Api.php`.
-Maybe you need to extract data from an API. You can inject any dependencies as needed.
-
-You can also inject credentials like secret api-key : copy `config/credentials.php.dist` to `config/credentials.php` and edit content.
-
-```php
-/**
- * object $this->client (Guzzle HTTP) is available to make curl requests
- * array $this->credentials contains sensitive data
- * array $parameters (credentials) can contain sensitive data
- */
-```
-
-### Step 3
-
-Adapt the method `mapData()` in `src/Api.php` to manage frames and data you need.
-
-More information about frames [here](https://lametric-documentation.readthedocs.io/en/latest/guides/first-steps/first-lametric-indicator-app.html#id1).
-
-### Step 4 & Hosting
-
-You can deploy it everywhere you want. You only need PHP and `ext-json` (`ext-curl` if you consume an API).
-
-You only need to configure the docroot of your vhost to the folder **public**.
+- Pierre Grimaud [@pgrimaud](https://github.com/pgrimaud)
+- Julien Cousin-Alliot [@nispeon](https://github.com/nispeon)
 
 ## Feedback
 
-If you need help, [create an issue](https://github.com/pgrimaud/lametric-app-starter/issues) or contact me on [Twitter](http://twitter.com/pgrimaud_).
+If you need help, [create an issue](https://github.com/pgrimaud/lametric-binance/issues) or contact us on [Twitter](http://twitter.com/pgrimaud_).
