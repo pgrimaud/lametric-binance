@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaMetric;
 
 use GuzzleHttp\Client as HttpClient;
+use LaMetric\Helper\PriceHelper;
 use LaMetric\Helper\SymbolHelper;
 use Predis\Client as RedisClient;
 use LaMetric\Response\{Frame, FrameCollection};
@@ -18,7 +19,8 @@ class Api
         private HttpClient $httpClient,
         private RedisClient $redisClient,
         private array $credentials = []
-    ) {
+    )
+    {
     }
 
     /**
@@ -55,7 +57,7 @@ class Api
                 foreach ($prices['data'] as $crypto) {
                     if ($crypto['symbol'] === $balance['asset']) {
                         $binanceBalance = $balance['free'] + $balance['locked'];
-                        $totalBalance += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
+                        $totalBalance   += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
                         break;
                     }
                 }
@@ -63,7 +65,7 @@ class Api
         }
 
         return $this->mapData([
-            'total' => SymbolHelper::getSymbol($parameters['currency']) . round($totalBalance, 2),
+            'total' => SymbolHelper::getSymbol($parameters['currency']) . PriceHelper::round($totalBalance),
         ]);
     }
 
