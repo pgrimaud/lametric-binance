@@ -16,4 +16,19 @@ return [
         'type'    => Field::TEXT_TYPE,
         'default' => 'USD',
     ],
+    [
+        'key'     => 'position',
+        'type'    => Field::CHOICES_TYPE,
+        'choices' => [
+            'before',
+            'after',
+            'hide',
+        ],
+        'default' => 'before',
+    ],
+    [
+        'key'     => 'separate-assets',
+        'type'    => Field::SWITCH_TYPE,
+        'default' => 'false',
+    ],
 ];
