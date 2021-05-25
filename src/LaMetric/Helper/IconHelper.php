@@ -113,6 +113,6 @@ class IconHelper
      */
     public static function getIcon(string $code): string
     {
-        return isset(self::ICONS[$code]) ? self::ICONS[$code] : self::ICONS['ALL'];
+        return isset(self::ICONS[$code]) ? self::ICONS[$code] : '';
     }
 }
