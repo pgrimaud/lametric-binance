@@ -31,4 +31,10 @@ return [
         'type'    => Field::SWITCH_TYPE,
         'default' => 'false',
     ],
+    [
+        'key'     => 'hide-small-assets',
+        'type'    => Field::SWITCH_TYPE,
+        'default' => 'true',
+    ],
+
 ];

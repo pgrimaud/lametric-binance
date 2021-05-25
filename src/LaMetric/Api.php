@@ -58,7 +58,10 @@ class Api
                         if ($parameters['separate-assets'] === 'false') {
                             $wallets['ALL'] += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
                         } else {
-                            $wallets[$crypto['symbol']] = $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
+                            $price = $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
+                            if (($price > 1 && $parameters['hide-small-assets'] === 'true') || $parameters['hide-small-assets'] === 'false') {
+                                $wallets[$crypto['symbol']] = $price;
+                            }
                         }
                         break;
                     }
@@ -102,7 +105,6 @@ class Api
 
             $frameCollection->addFrame($frame);
         }
-
 
         return $frameCollection;
     }
