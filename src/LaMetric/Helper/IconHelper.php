@@ -7,7 +7,7 @@ namespace LaMetric\Helper;
 class IconHelper
 {
     public const ICONS = [
-        'ALL'   => '45491',
+        'ALL'   => '43725',
         'BTC'   => '857',
         'ETH'   => '44062',
         'XRP'   => '39692',
