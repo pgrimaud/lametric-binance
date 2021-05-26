@@ -74,17 +74,11 @@ class Api
         }
 
         foreach ($wallets as &$wallet) {
-            switch ($parameters['position']) {
-                case 'hide':
-                    $wallet = PriceHelper::round($wallet);
-                    break;
-                case 'after':
-                    $wallet = PriceHelper::round($wallet) . SymbolHelper::getSymbol($parameters['currency']);
-                    break;
-                case 'before':
-                default:
-                    $wallet = SymbolHelper::getSymbol($parameters['currency']) . PriceHelper::round($wallet);
-            }
+            $wallet = match ($parameters['position']) {
+                'hide' => PriceHelper::round($wallet),
+                'after' => PriceHelper::round($wallet) . SymbolHelper::getSymbol($parameters['currency']),
+                default => SymbolHelper::getSymbol($parameters['currency']) . PriceHelper::round($wallet),
+            };
         }
 
         return $this->mapData($wallets);
