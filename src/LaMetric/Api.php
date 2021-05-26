@@ -18,7 +18,8 @@ class Api
         private HttpClient $httpClient,
         private RedisClient $redisClient,
         private array $credentials = []
-    ) {
+    )
+    {
     }
 
     /**
@@ -56,6 +57,9 @@ class Api
                     if ($crypto['symbol'] === $balance['asset']) {
                         $binanceBalance = $balance['free'] + $balance['locked'];
                         if ($parameters['separate-assets'] === 'false') {
+                            if (!isset($wallets['ALL'])) {
+                                $wallets['ALL'] = 0;
+                            }
                             $wallets['ALL'] += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
                         } else {
                             $price = $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
@@ -100,7 +104,7 @@ class Api
          */
         foreach ($data as $key => $wallet) {
             $frame = new Frame();
-            $frame->setText($wallet);
+            $frame->setText((string) $wallet);
             $frame->setIcon(IconHelper::getIcon($key));
 
             $frameCollection->addFrame($frame);
