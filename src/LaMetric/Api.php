@@ -51,23 +51,25 @@ class Api
 
         $wallets = [];
 
-        foreach ($account['balances'] as $balance) {
-            if ($balance['free'] > 0 || $balance['locked'] > 0) {
-                foreach ($prices['data'] as $crypto) {
-                    if ($crypto['symbol'] === $balance['asset']) {
-                        $binanceBalance = $balance['free'] + $balance['locked'];
-                        if ($parameters['separate-assets'] === 'false') {
-                            if (!isset($wallets['ALL'])) {
-                                $wallets['ALL'] = 0;
+        if(isset($account['balances'])){
+            foreach ($account['balances'] as $balance) {
+                if ($balance['free'] > 0 || $balance['locked'] > 0) {
+                    foreach ($prices['data'] as $crypto) {
+                        if ($crypto['symbol'] === $balance['asset']) {
+                            $binanceBalance = $balance['free'] + $balance['locked'];
+                            if ($parameters['separate-assets'] === 'false') {
+                                if (!isset($wallets['ALL'])) {
+                                    $wallets['ALL'] = 0;
+                                }
+                                $wallets['ALL'] += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
+                            } else {
+                                $price = $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
+                                if (($price > 1 && $parameters['hide-small-assets'] === 'true') || $parameters['hide-small-assets'] === 'false') {
+                                    $wallets[$crypto['symbol']] = $price;
+                                }
                             }
-                            $wallets['ALL'] += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
-                        } else {
-                            $price = $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
-                            if (($price > 1 && $parameters['hide-small-assets'] === 'true') || $parameters['hide-small-assets'] === 'false') {
-                                $wallets[$crypto['symbol']] = $price;
-                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
