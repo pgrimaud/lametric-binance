@@ -37,7 +37,7 @@ class Api
             $res        = $this->httpClient->request('GET', $cmcApi);
             $jsonPrices = (string) $res->getBody();
 
-            $this->redisClient->set($redisKey, $jsonPrices, 'ex', 120);
+            $this->redisClient->set($redisKey, $jsonPrices, 'ex', 600);
         }
 
         $prices = json_decode($jsonPrices, true);
