@@ -17,7 +17,6 @@ class Api
     public function __construct(
         private HttpClient $httpClient,
         private RedisClient $redisClient,
-        private array $credentials = []
     )
     {
     }

@@ -39,6 +39,13 @@ class Validator
                 $this->parameters[$key] = $field['default'];
             }
 
+            if (
+                $key === 'currency' &&
+                in_array($this->parameters[$key], ['USDT', 'BUSD', '<NULL>'])
+            ) {
+                $this->parameters[$key] = 'USD';
+            }
+
             switch ($field['type']) {
                 case Field::TEXT_TYPE:
                     if ($this->parameters[$key] === '') {
