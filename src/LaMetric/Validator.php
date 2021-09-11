@@ -41,7 +41,7 @@ class Validator
 
             if (
                 $key === 'currency' &&
-                in_array($this->parameters[$key], ['USDT', 'BUSD', '<NULL>'])
+                in_array(strtoupper($this->parameters[$key]), ['USDT', 'BUSD', '<NULL>'])
             ) {
                 $this->parameters[$key] = 'USD';
             }
