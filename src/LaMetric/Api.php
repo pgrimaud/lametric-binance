@@ -36,10 +36,12 @@ class Api
             $res        = $this->httpClient->request('GET', $cmcApi);
             $jsonPrices = (string) $res->getBody();
 
-            $this->redisClient->set($redisKey, $jsonPrices, 'ex', 120);
-        }
+            $prices = $this->formatData(json_decode($jsonPrices, true), $parameters['currency']);
 
-        $prices = json_decode($jsonPrices, true);
+            $this->redisClient->set($redisKey, json_encode($prices), 'ex', 120);
+        } else {
+            $prices = json_decode($jsonPrices, true);
+        }
 
         $api = new BinanceAPI(
             $parameters['api-key'],
@@ -50,24 +52,23 @@ class Api
 
         $wallets = [];
 
-        if(isset($account['balances'])){
+        if (isset($account['balances'])) {
             foreach ($account['balances'] as $balance) {
                 if ($balance['free'] > 0 || $balance['locked'] > 0) {
-                    foreach ($prices['data'] as $crypto) {
-                        if ($crypto['symbol'] === $balance['asset']) {
-                            $binanceBalance = $balance['free'] + $balance['locked'];
-                            if ($parameters['separate-assets'] === 'false') {
-                                if (!isset($wallets['ALL'])) {
-                                    $wallets['ALL'] = 0;
-                                }
-                                $wallets['ALL'] += $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
-                            } else {
-                                $price = $crypto['quote'][strtoupper($parameters['currency'])]['price'] * $binanceBalance;
-                                if (($price > 1 && $parameters['hide-small-assets'] === 'true') || $parameters['hide-small-assets'] === 'false') {
-                                    $wallets[$crypto['symbol']] = $price;
-                                }
+                    if (isset($prices[$balance['asset']])) {
+                        $asset = $prices[$balance['asset']];
+
+                        $binanceBalance = $balance['free'] + $balance['locked'];
+                        if ($parameters['separate-assets'] === 'false') {
+                            if (!isset($wallets['ALL'])) {
+                                $wallets['ALL'] = 0;
                             }
-                            break;
+                            $wallets['ALL'] += $asset['price'] * $binanceBalance;
+                        } else {
+                            $price = $asset['price'] * $binanceBalance;
+                            if (($price > 1 && $parameters['hide-small-assets'] === 'true') || $parameters['hide-small-assets'] === 'false') {
+                                $wallets[$asset['short']] = $price;
+                            }
                         }
                     }
                 }
@@ -106,5 +107,36 @@ class Api
         }
 
         return $frameCollection;
+    }
+
+    /**
+     * @param array  $sources
+     * @param string $currencyToShow
+     *
+     * @return array
+     */
+    private function formatData(array $sources, string $currencyToShow): array
+    {
+        $data = [];
+
+        foreach ($sources['data'] as $crypto) {
+            // manage multiple currencies with the same symbol
+            // & override VAL value
+            if (!isset($data[$crypto['symbol']]) || $crypto['symbol'] === 'VAL') {
+
+                // manage error on results // maybe next time?
+                if (!isset($crypto['quote'][$currencyToShow]['price'])) {
+                    exit;
+                }
+
+                $data[$crypto['symbol']] = [
+                    'short'  => $crypto['symbol'],
+                    'price'  => $crypto['quote'][$currencyToShow]['price'],
+                    'change' => round((float) $crypto['quote'][$currencyToShow]['percent_change_24h'], 2),
+                ];
+            }
+        }
+
+        return $data;
     }
 }
