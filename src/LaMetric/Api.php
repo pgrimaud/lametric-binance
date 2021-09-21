@@ -38,7 +38,7 @@ class Api
 
             $prices = $this->formatData(json_decode($jsonPrices, true), $parameters['currency']);
 
-            $this->redisClient->set($redisKey, json_encode($prices), 'ex', 120);
+            $this->redisClient->set($redisKey, json_encode($prices), 'ex', 180);
         } else {
             $prices = json_decode($jsonPrices, true);
         }
