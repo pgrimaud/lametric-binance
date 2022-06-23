@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace LaMetric;
 
-use LaMetric\Response\{Frame, FrameCollection};
+use LaMetric\Response\Frame;
+use LaMetric\Response\FrameCollection;
 
 class Response
 {

@@ -1,8 +1,9 @@
 <?php
 
-use LaMetric\{Api, Response, Validator};
+use LaMetric\Api;
+use LaMetric\Response;
+use LaMetric\Validator;
 
-use GuzzleHttp\Client as HttpClient;
 use Predis\Client as RedisClient;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -18,7 +19,7 @@ try {
     $validator = new Validator($_GET);
     $validator->check($parameters);
 
-    $api    = new Api(new HttpClient, new RedisClient, $credentials);
+    $api    = new Api(new RedisClient());
     $frames = $api->fetchData($validator->getData());
 
     echo $response->printData($frames);

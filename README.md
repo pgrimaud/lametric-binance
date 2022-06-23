@@ -4,7 +4,7 @@ Easily display the total balance of your cryptocurrencies of your Binance Spot a
 
 ![image](https://user-images.githubusercontent.com/1866496/119222359-52de0280-baf4-11eb-871e-5929a33d1d24.png)
 
-Based on the [Binance API](https://binance-docs.github.io/apidocs/spot/en/) and [CoinMarketCap API](https://coinmarketcap.com/api/)
+Based on the [Binance API](https://binance-docs.github.io/apidocs/spot/en/), [CoinGecko](https://www.coingecko.com/) and [ExchangeRate](https://exchangerate.host/)
 
 # How to connect your Binance account?
 
@@ -25,6 +25,7 @@ If you like or use this app, please share your love by starring this repository,
 
 - Pierre Grimaud [@pgrimaud](https://github.com/pgrimaud)
 - Julien Cousin-Alliot [@nispeon](https://github.com/nispeon)
+- Yannis Obert [@yannisobert](https://github.com/yannisobert)
 
 ## Feedback
 

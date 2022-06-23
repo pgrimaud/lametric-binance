@@ -5,43 +5,24 @@ declare(strict_types=1);
 namespace LaMetric;
 
 use Binance\API as BinanceAPI;
-use LaMetric\Helper\{IconHelper, PriceHelper, SymbolHelper};
+use LaMetric\Helper\IconHelper;
+use LaMetric\Helper\PriceHelper;
+use LaMetric\Helper\SymbolHelper;
 use Predis\Client as RedisClient;
-use GuzzleHttp\Client as HttpClient;
-use LaMetric\Response\{Frame, FrameCollection};
+use LaMetric\Response\Frame;
+use LaMetric\Response\FrameCollection;
 
 class Api
 {
-    public const CMC_API = 'https://web-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?cryptocurrency_type=all&limit=4999&convert=';
-
     public function __construct(
-        private HttpClient $httpClient,
         private RedisClient $redisClient,
-    )
-    {
+    ) {
     }
 
-    /**
-     * @param array $parameters
-     *
-     * @return FrameCollection
-     */
     public function fetchData(array $parameters = []): FrameCollection
     {
-        $redisKey   = 'lametric:cryptocurrencies:' . strtolower($parameters['currency']);
-        $jsonPrices = $this->redisClient->get($redisKey);
-
-        if (!$jsonPrices) {
-            $cmcApi     = self::CMC_API . strtolower($parameters['currency']);
-            $res        = $this->httpClient->request('GET', $cmcApi);
-            $jsonPrices = (string) $res->getBody();
-
-            $prices = $this->formatData(json_decode($jsonPrices, true), $parameters['currency']);
-
-            $this->redisClient->set($redisKey, json_encode($prices), 'ex', 300);
-        } else {
-            $prices = json_decode($jsonPrices, true);
-        }
+        $pricesFile = $this->redisClient->get('lametric:cryptocurrencies');
+        $prices = json_decode((string)$pricesFile, true);
 
         $api = new BinanceAPI(
             $parameters['api-key'],
@@ -76,6 +57,8 @@ class Api
         }
 
         foreach ($wallets as &$wallet) {
+            $wallet = $wallet * $this->convertToCurrency($parameters['currency']);
+
             $wallet = match ($parameters['position']) {
                 'hide' => PriceHelper::round($wallet),
                 'after' => PriceHelper::round($wallet) . SymbolHelper::getSymbol($parameters['currency']),
@@ -86,18 +69,10 @@ class Api
         return $this->mapData($wallets);
     }
 
-    /**
-     * @param array $data
-     *
-     * @return FrameCollection
-     */
     private function mapData(array $data = []): FrameCollection
     {
         $frameCollection = new FrameCollection();
 
-        /**
-         * Transform data as FrameCollection and Frame
-         */
         foreach ($data as $key => $wallet) {
             $frame = new Frame();
             $frame->setText((string) $wallet);
@@ -109,34 +84,19 @@ class Api
         return $frameCollection;
     }
 
-    /**
-     * @param array  $sources
-     * @param string $currencyToShow
-     *
-     * @return array
-     */
-    private function formatData(array $sources, string $currencyToShow): array
+    private function convertToCurrency(string $currencyToShow): float|int
     {
-        $data = [];
-
-        foreach ($sources['data'] as $crypto) {
-            // manage multiple currencies with the same symbol
-            // & override VAL value
-            if (!isset($data[$crypto['symbol']]) || $crypto['symbol'] === 'VAL') {
-
-                // manage error on results // maybe next time?
-                if (!isset($crypto['quote'][$currencyToShow]['price'])) {
-                    exit;
-                }
-
-                $data[$crypto['symbol']] = [
-                    'short'  => $crypto['symbol'],
-                    'price'  => $crypto['quote'][$currencyToShow]['price'],
-                    'change' => round((float) $crypto['quote'][$currencyToShow]['percent_change_24h'], 2),
-                ];
-            }
+        if ($currencyToShow === 'USD') {
+            return 1;
         }
 
-        return $data;
+        $pricesFile = $this->redisClient->get('lametric:forex');
+        $rates = json_decode((string)$pricesFile, true);
+
+        if (!isset($rates[$currencyToShow])) {
+            throw new \Exception(sprintf('Currency %s not found', $currencyToShow));
+        }
+
+        return $rates[$currencyToShow];
     }
 }
