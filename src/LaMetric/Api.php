@@ -48,7 +48,7 @@ class Api
                         } else {
                             $price = $asset['price'] * $binanceBalance;
                             if (($price > 1 && $parameters['hide-small-assets'] === 'true') || $parameters['hide-small-assets'] === 'false') {
-                                $wallets[$asset['short']] = $price;
+                                $wallets[$balance['asset']] = $price;
                             }
                         }
                     }
