@@ -35,7 +35,7 @@ class Api
 
         if (isset($account['balances'])) {
             foreach ($account['balances'] as $balance) {
-                if ($balance['free'] > 0 || $balance['locked'] > 0) {
+                if ((float) $balance['free'] > 0 || (float) $balance['locked'] > 0) {
                     if (isset($prices[$balance['asset']])) {
                         $asset = $prices[$balance['asset']];
 

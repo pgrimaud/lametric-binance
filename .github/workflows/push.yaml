@@ -20,7 +20,7 @@ jobs:
           tools: composer
 
       - name: "Install dependencies"
-        run: composer install
+        run: composer install && composer audit
 
       - name: "PHPStan"
         run: composer phpstan
@@ -31,8 +31,6 @@ jobs:
       - name: "Test suite"
         run: composer test
 
-      - uses: actions/checkout@v2
-      - uses: symfonycorp/security-checker-action@v2
       - name: Deploy to production
         uses: appleboy/ssh-action@master
         with:

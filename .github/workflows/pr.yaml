@@ -19,7 +19,7 @@ jobs:
           tools: composer
 
       - name: "Install dependencies"
-        run: composer install
+        run: composer install && composer audit
 
       - name: "PHPStan"
         run: composer phpstan
